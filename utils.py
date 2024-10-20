@@ -53,7 +53,7 @@ def create_gauge_chart(probability):
             "color": "rgba(255,255,0,0.3)"
           },
           {
-            "range": [0.6, 1],
+            "range": [60, 100],
             "color": "rgba(255,0,0,0.3)"
           }
         ],

@@ -91,7 +91,10 @@ def make_predictions(input_df, input_dict):
 
 
 def explain_prediction(probability, input_dict, surname):
-  prompt = f"""You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
+  prompt = f"""
+  # CONTEXT #
+
+  You are an expert data scientist at a bank, where you specialize in interpreting and explaining predictions of machine learning models.
   
   Your machine learning model has predicted that a customer named {surname} has a {round(probability * 100, 1)}% probability of churning, based on the information provided below.
   
@@ -124,16 +127,27 @@ def explain_prediction(probability, input_dict, surname):
   Here are summary statistics for non-churned customers:
   {df[df['Exited'] == 0].describe()}
 
-  - If the customer has over a 40% risk of churning, generate a 3 sentence explanation of why they are at risk of churning.
-  - If the customer has less than a 40% risk of churning, generate a 3 sentence explanation of why they might not be at risk of churning.
-  - Your explanation should be based on the customer's information, the summary statistics of churned and non-churned customers, and provided feature importances.
+  # STYLE #
 
-  Don't mention the probability of churning, or the machine learning model, or any underlying numbers, or say anything like "Based on the machine learning model's prediction and top 10 most important features", just explain the prediction.
-  
-"""
+  The overall assessment must be accurate, but the explanation should focus on general trends and insights from these features without explicitly mentioning numbers, statistics, or probability values.
+
+  # OBJECTIVE #
+
+  - If {surname} is over 40% risk of churning, explain why by emphasizing behavioral patterns and tendencies common among customers with similar profiles.
+  - If {surname} is not over 40% risk of churning, explain why by focusing on aspects that typically indicate stability or satisfaction.
+
+  # AUDIENCE #
+
+  Direct this explanation towards users who do not have much knowledge of the background details of {surname} and how those details are working together. Don't include any jargon or references to any of the data used to derive the explanation.
+
+  # RESPONSE #
+
+  Avoid direct references to any specific figures, statistical terms, category names, probabilities, model, models, top 10 most important features, or technical jargon. Keep the explanation to under 4 sentences.
+    
+  """
 
   raw_response = client.chat.completions.create(
-      model='llama-3.2-3b-preview',
+      model='llama-3.1-8b-instant',
       messages=[{
           "role": "user",
           "content": prompt
@@ -145,7 +159,10 @@ def explain_prediction(probability, input_dict, surname):
 
 def generate_email(probability, input_dict, explanation, surname):
 
-  prompt = f"""You are a manager at HS Bank. You are responsible for ensuring customers stay with the bank and are incentivized with various offers.
+  prompt = f"""
+  # CONTEXT #
+
+  You are a manager at HS Bank. You are responsible for ensuring customers stay with the bank and are incentivized with various offers.
   
   You noticed a customer named {surname} has a {round(probability * 100, 1)}% probability of churning
 
@@ -157,9 +174,19 @@ def generate_email(probability, input_dict, explanation, surname):
   
   {explanation}
   
+  # OBJECTIVE #
+
   Generate an email to the customer based on their information, asking them to stay if they are at risk of churning, or offering them incentives so they become more loyal to the bank. 
   
-  Make sure to list out a set o fincentives to stay based on their information, in bullet point format Don't ever mention the probability of churning, or the machine learning model to the customer. Don't add that part at the end about the option to change the email and that it is just a template. Just give me the email contents, and sign it by HS Bank, not the manager's name."""
+  Make sure to include a list of incentives to stay based on their information, one bullet point per line. Don't ever mention the probability of churning, or the machine learning model to the customer. 
+  
+  # AUDIENCE #
+
+  This email is targeted to the customer {surname}. Make sure the incentives are tailored such that they make {surname} want to stay loyal to HS Bank.
+
+  # RESPONSE #
+
+  Don't add that part at the end about the option to change the email and that it is just a template. Just give the email contents, and sign it by HS Bank, not the manager's name. Put the HS Bank signature on a new line"""
 
   raw_response = client.chat.completions.create(
       model="llama-3.1-8b-instant",
@@ -215,6 +242,8 @@ if selected_customer_option:
                              min_value=0,
                              max_value=50,
                              value=int(selected_customer["Tenure"]))
+    
+    
 
   with col2:
 
