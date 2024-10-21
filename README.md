@@ -1,6 +1,6 @@
 # Customer Churn Predictor
 
-Web app that utilizes Machine Learning to provide insights on about which customers are likely to churn in a dataset of 10,000 bank customers. Explanations of the predictions and sample email to reduce possibility of churning are generated via Mixtral 7B LLM.
+Web app that utilizes XGBoost machine learning model to provide insights on about which customers are likely to churn in a dataset of 10,000 bank customers. Explanations of the predictions and sample email to reduce possibility of churning are generated via Mixtral 7B LLM.
 
 ## Table of Contents
 - [Customer Churn Predictor](#customer-churn-predictor)
