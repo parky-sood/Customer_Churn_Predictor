@@ -14,7 +14,7 @@ Web app that utilizes XGBoost machine learning model to provide insights on abou
 ## How it Works
 
 The entire dataset is in `churn.csv`. That data is extracted into a dataframe and used to train various models like XGBoost (`xgb_model.pkl`), Decision Tree (`dt_model.pkl`), and K-Nearest Neighbors (`knn_model.pkl`). Some models like `xgboost-featureEngineered.pkl` also use a feature-engineered dataset to extract more information from `churn.csv`.
-A comprehensive set of trained models is in the `models` folder. Next, this data is used to generate customer insights for the figures in the web app.
+A comprehensive set of trained models is in the `models` folder. Next, this data is used to generate customer insights for the figures in the web app, and models predict the possibility of the selected customer leaving the bank.
 
 ![alt text](image.png)
 
