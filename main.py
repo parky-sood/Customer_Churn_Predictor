@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 from openai import OpenAI
 from dotenv import load_dotenv
+from scipy.stats import percentileofscore
 import os
 
 
@@ -64,15 +65,23 @@ def prepare_input(credit_score, location, gender, age, tenure, balance,
   input_df = pd.DataFrame([input_dict])
   return input_df, input_dict
 
+def calculate_percentiles(df, input_dict):
+    percentiles = {}
+    for feature in input_dict:
+        if (feature == 'CreditScore' or feature == 'Age' or feature == 'Tenure' or feature == 'Balance' or feature == 'NumOfProducts') and feature in df.columns:
+            value = input_dict[feature]
+            print(df[feature], feature)
+            percentiles[feature] = percentileofscore(df[feature], value, kind='mean')
+    return percentiles
 
-def make_predictions(input_df, input_dict):
+def make_predictions(input_df, input_dict, customer_percentiles):
 
   probabilities = {
       'XGBoost': xgboost_model.predict_proba(input_df)[0][1],
       'Random Forest': random_forest_model.predict_proba(input_df)[0][1],
       'K-Neareast Neighbors': knn_model.predict_proba(input_df)[0][1],
   }
-
+  
   avg_probability = np.mean(list(probabilities.values()))
 
   col1, col2 = st.columns(2)
@@ -86,6 +95,9 @@ def make_predictions(input_df, input_dict):
   with col2:
     fig_probs = ut.create_model_probability_chart(probabilities)
     st.plotly_chart(fig_probs, use_container_width=True)
+  
+  percentile_chart = ut.create_percentile_bar_chart(customer_percentiles)
+  st.plotly_chart(percentile_chart, use_container_width=True)
 
   return avg_probability
 
@@ -147,7 +159,7 @@ def explain_prediction(probability, input_dict, surname):
   """
 
   raw_response = client.chat.completions.create(
-      model='llama-3.1-8b-instant',
+      model='mixtral-8x7b-32768',
       messages=[{
           "role": "user",
           "content": prompt
@@ -189,7 +201,7 @@ def generate_email(probability, input_dict, explanation, surname):
   Don't add that part at the end about the option to change the email and that it is just a template. Just give the email contents, and sign it by HS Bank, not the manager's name. Put the HS Bank signature on a new line"""
 
   raw_response = client.chat.completions.create(
-      model="llama-3.1-8b-instant",
+      model="mixtral-8x7b-32768",
       messages=[{
           "role": "user",
           "content": prompt
@@ -274,7 +286,8 @@ if selected_customer_option:
                                        has_credit_card, is_active_member,
                                        estimated_salary)
 
-  avg_probability = make_predictions(input_df, input_dict)
+  percentiles = calculate_percentiles(df, input_dict)
+  avg_probability = make_predictions(input_df, input_dict, percentiles)
 
   explanation = explain_prediction(avg_probability, input_dict,
                                    selected_customer["Surname"])

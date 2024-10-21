@@ -94,4 +94,25 @@ def create_model_probability_chart(probabilities):
                    margin=dict(l=20, r=20, t=40, b=20))
 
   return fig
+
+def create_percentile_bar_chart(percentiles):
+    features = list(percentiles.keys())
+    values = list(percentiles.values())
+
+    fig = go.Figure(
+        go.Bar(
+            x=features,
+            y=values,
+            text=[f"{v:.1f}%" for v in values],
+            textposition='auto',
+        )
+    )
+    fig.update_layout(
+        title="Customer Feature Percentiles",
+        xaxis_title="Features",
+        yaxis_title="Percentile",
+        yaxis=dict(range=[0, 100]),  # Percentile range is 0 to 100
+        template="plotly_white",
+    )
+    return fig
   
