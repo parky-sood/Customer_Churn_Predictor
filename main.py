@@ -70,7 +70,6 @@ def calculate_percentiles(df, input_dict):
     for feature in input_dict:
         if (feature == 'CreditScore' or feature == 'Age' or feature == 'Tenure' or feature == 'Balance' or feature == 'NumOfProducts') and feature in df.columns:
             value = input_dict[feature]
-            print(df[feature], feature)
             percentiles[feature] = percentileofscore(df[feature], value, kind='mean')
     return percentiles
 
